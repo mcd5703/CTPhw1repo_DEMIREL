@@ -220,4 +220,16 @@ exportgraphics(fig,'HW1_Contour_Comparison.png', 'Resolution',600, ...
     'BackgroundColor','white');
 
 %% ERROR ANALYSIS
+% vectorized using MATLAB
 
+% total number of spatial nodes
+N = Nx * Ny;
+
+% point-wise error
+error = phi_exact - phi;
+
+% RMS error
+epsilon = sqrt(sum(error(:).^2) / N);
+
+% display RMS error
+fprintf('\nRMS Error at t = %.2f: %.8e\n', tmax, epsilon);
