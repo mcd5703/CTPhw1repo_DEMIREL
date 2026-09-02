@@ -63,6 +63,9 @@ Nt = ceil((tmax - tmin) / dt) + 1; % (+1 converts intervals to nodes)
 % ceil is used to ensure that in the worst case (when the range isn't 
 % divisible well by dt), there are more time-steps than necessary
 
+% recalculate dt now that Nt is known (if dt wasn't divisible)
+dt = (tmax - tmin) / (Nt-1);
+
 % spatial arrays
 x = linspace(xmin, xmax, Nx);
 y = linspace(ymin, ymax, Ny);
@@ -73,8 +76,75 @@ t = linspace(tmin, tmax, Nt);
 
 %% SOLVER
 
-% allocate 2D phi array
+% --- ALLOCATE 2D phi ARRAY ---
+phi = zeros(Nx,Ny);
+
+% --- APPLY INITIAL CONDITION ---
+for j = 1:Ny
+    for i = 1:Nx
+        phi(i,j) = exp(- ((x(i) - 0.5)^2 + (y(j) - 0.5)^2) / v);
+        % or just phi(i,j) = phi_True(0,x(i),y(j));
+
+        % In this particular problem this also handles BC's because they
+        % are Dirichlet bounds of the analytical solution 
+    end
+end
+
+% --- APPLY BOUNDARY CONDITIONS --- 
+% (because normally your initial condition doesn't perfectly set up BCs)
+
+% set initial time
+n = 1;
+
+% vertical bounds
+for j = 1:Ny
+    % left
+    phi(1,j)    = phi_True(t(n),xmin,y(j));
+    % right
+    phi(Nx,j)   = phi_True(t(n),xmax,y(j));
+end
+% horizontal bounds
+for i = 1:Nx
+    % bottom
+    phi(i,1)    = phi_True(t(n),x(i),ymin);
+    % top
+    phi(i,Ny)   = phi_True(t(n),x(i),ymax);
+end
 
 
+%  --- EXPLICIT EULER ---
+% allocate space for new (n+1) phi
+phinew = phi;
+% iterate over time
+for n = 1:Nt-1 % (Nt-1 because the last time is already computed after)
+    % compute the domain
+    for j = 2:Ny-1
+        for i = 2:Nx-1
+            phinew(i,j) = phi(i,j) - dt * ...
+                ( ux/(2*dx)*(phi(i+1,j) - phi(i-1,j))   ...
+                  + uy/(2*dy)*(phi(i,j+1) - phi(i,j-1)) ...
+                  - v/dx^2*(phi(i+1,j) - 2*phi(i,j) + phi(i-1,j)) ...
+                  - v/dy^2*(phi(i,j+1) - 2*phi(i,j) + phi(i,j-1)) ...
+                );
+        end
+    end
 
+    % reapply bounds
+    % vertical bounds
+    for j = 1:Ny
+        % left
+        phinew(1,j)    = phi_True(t(n+1),xmin,y(j));
+        % right
+        phinew(Nx,j)   = phi_True(t(n+1),xmax,y(j));
+    end
+    % horizontal bounds
+    for i = 1:Nx
+        % bottom
+        phinew(i,1)    = phi_True(t(n+1),x(i),ymin);
+        % top
+        phinew(i,Ny)   = phi_True(t(n+1),x(i),ymax);
+    end
 
+    % reset phi
+    phi = phinew;
+end
