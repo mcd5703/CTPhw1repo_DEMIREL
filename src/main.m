@@ -42,6 +42,9 @@ v = 0.01; % nu
 phi_True = @(t,x,y) (1./(4.*t+1)) ...
              .* exp(-((x-ux.*t-0.5).^2+(y-uy.*t-0.5).^2)./(v.*(4.*t+1)));
 
+% --- CONTOUR PLOT ---
+% number of interior levels
+L = 5;
 
 %% SPATIAL AND TEMPORAL ARRAYS
 
@@ -145,4 +148,76 @@ end
 [X,Y] = ndgrid(x,y); % ndgrid used to conserve i,j grid style
 phi_exact = phi_True(tmax,X,Y);
 
+
+%% RESULTS FIGURE
+
+% --- COMMON CONTOUR SYSTEM ---
+
+% generate common contour levels so numerical and analytical contours
+phiMin = min([phi(:); phi_exact(:)]);
+phiMax = max([phi(:); phi_exact(:)]);
+
+% ignore bounds because they are outliers
+allLevels = linspace(phiMin,phiMax,L+2);
+levels = allLevels(2:end-1);
+
+% --- PLOT FIGURE ---
+% (transpose phi and phi_exact when plotting due to
+%  MATLAB plotting convention)
+
+% create figure
+fig = figure;
+theme(fig,'light');
+
+% plot numerical contours
+[c,h] = contour(x,y,phi.',levels, 'LineStyle','-', 'LineWidth',1.5);
+hold on;
+
+% plot analytical contours
+[c_true,h_true] = ...
+    contour(x,y,phi_exact.',levels, 'LineStyle',':', 'LineWidth',1.5);
+
+% --- FIGURE FORMATTING ---
+
+% color bar
+clim([phiMin phiMax]);
+cb = colorbar;
+cb.Label.String = '\phi';
+
+% contour labels
+clabel(c_true,h_true,'FontSize',12, 'LabelSpacing',200);
+% only analytical gets labels, otherwise its too cluttered
+
+% axis labels
+xlabel('x');
+ylabel('y');
+
+% title
+title(...
+    sprintf('Numerical vs. Analytical Solutions for ϕ (t = %.1f)', tmax));
+
+% legend
+legend([h,h_true], {'Numerical','Analytical'}, ...
+    'Location','south');
+
+% axis limits
+xlim([xmin xmax]);
+ylim([ymin ymax]);
+axis equal;
+
+% final details
+grid on;
+box on;
+set(gca,'FontSize',11);
+hold off;
+
+% increase font size
+fontsize(fig,"scale",1.2);
+
+% --- EXPORT FIGURE --- 
+
+exportgraphics(fig,'HW1_Contour_Comparison.png', 'Resolution',600, ...
+    'BackgroundColor','white');
+
+%% ERROR ANALYSIS
 
