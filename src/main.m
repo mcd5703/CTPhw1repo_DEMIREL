@@ -39,8 +39,8 @@ v = 0.01; % nu
 % --- ACTUAL SOLUTION ---
 
 % function handle
-phi_True = @(t,x,y) (1/(4*t+1)) ...
-                    * exp(-((x-ux*t-0.5)^2+(y-uy*t-0.5)^2)/(v*(4*t+1)));
+phi_True = @(t,x,y) (1./(4.*t+1)) ...
+             .* exp(-((x-ux.*t-0.5).^2+(y-uy.*t-0.5).^2)./(v.*(4.*t+1)));
 
 
 %% SPATIAL AND TEMPORAL ARRAYS
@@ -73,7 +73,6 @@ y = linspace(ymin, ymax, Ny);
 % temporal array
 t = linspace(tmin, tmax, Nt);
 
-
 %% SOLVER
 
 % --- ALLOCATE 2D phi ARRAY ---
@@ -97,20 +96,16 @@ end
 n = 1;
 
 % vertical bounds
-for j = 1:Ny
-    % left
-    phi(1,j)    = phi_True(t(n),xmin,y(j));
-    % right
-    phi(Nx,j)   = phi_True(t(n),xmax,y(j));
-end
-% horizontal bounds
-for i = 1:Nx
-    % bottom
-    phi(i,1)    = phi_True(t(n),x(i),ymin);
-    % top
-    phi(i,Ny)   = phi_True(t(n),x(i),ymax);
-end
+% left
+phi(1,:)    = phi_True(t(n),xmin,y);
+% right
+phi(Nx,:)   = phi_True(t(n),xmax,y);
 
+% horizontal bounds
+% bottom
+phi(:,1)    = phi_True(t(n),x,ymin).';
+% top
+phi(:,Ny)   = phi_True(t(n),x,ymax).';
 
 %  --- EXPLICIT EULER ---
 % allocate space for new (n+1) phi
@@ -131,20 +126,23 @@ for n = 1:Nt-1 % (Nt-1 because the last time is already computed after)
 
     % reapply bounds
     % vertical bounds
-    for j = 1:Ny
-        % left
-        phinew(1,j)    = phi_True(t(n+1),xmin,y(j));
-        % right
-        phinew(Nx,j)   = phi_True(t(n+1),xmax,y(j));
-    end
+    % left
+    phinew(1,:)    = phi_True(t(n+1),xmin,y);
+    % right
+    phinew(Nx,:)   = phi_True(t(n+1),xmax,y);
     % horizontal bounds
-    for i = 1:Nx
-        % bottom
-        phinew(i,1)    = phi_True(t(n+1),x(i),ymin);
-        % top
-        phinew(i,Ny)   = phi_True(t(n+1),x(i),ymax);
-    end
-
+    % bottom
+    phinew(:,1)    = phi_True(t(n+1),x,ymin).';
+    % top
+    phinew(:,Ny)   = phi_True(t(n+1),x,ymax).';
+    
     % reset phi
     phi = phinew;
 end
+
+%% ANALYTICAL SOLUTION (at t = tmax)
+
+[X,Y] = ndgrid(x,y); % ndgrid used to conserve i,j grid style
+phi_exact = phi_True(tmax,X,Y);
+
+
