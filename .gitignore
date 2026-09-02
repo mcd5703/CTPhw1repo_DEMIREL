@@ -1,0 +1,49 @@
+# Author's note (Melik Demirel 9/1/2026)
+# I had made .gitignore files for C++ programming in the past. 
+# I combined this with stuff I've selected from the shared template at https://github.com/MFlowCode/MFC for HW1
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Ignore the .vscode folder
+/.vscode
+
+# Mac Datastore
+.DS_Store
+
+# Video Files (too large for github)
+*.mp4
+*.mov
+*.mkv
+*.avi
+
+# Ignore build and thirdparty folders
+/build
+/third_party
+/docs

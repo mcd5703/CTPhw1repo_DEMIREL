@@ -1,0 +1,19 @@
+# I set this up using https://www.mathworks.com/help/matlab/matlab_prog/set-up-git-source-control.html
+* text=auto
+
+# MATLAB binaries
+*.mlx binary
+*.mat binary
+*.fig binary
+*.mlapp binary
+*.slx binary
+*.mdl binary
+*.p binary
+*.mex* binary
+
+# Other binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.xlsx binary
